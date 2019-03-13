@@ -11,9 +11,74 @@ class Album extends Component {
 
     this.state = {
       album: album,
+      currentSong: album.songs[0],
+      isPlaying: false,
+      isPlaying: false,
+      isHovered: false,
+      dynamicClass: 'song-number',
+      targetId: 0
 
     };
+
+    this.audioElement = document.createElement('audio');
+    this.audioElement.src = album.songs[0].audioSrc;
   }
+
+  play() {
+    this.audioElement.play();
+    this.setState({ isPlaying: true });
+  }
+
+  pause() {
+    this.audioElement.pause();
+    this.setState({ isPlaying: false });
+}
+
+  setSong(song) {
+    this.audioElement.src = song.audioSrc;
+    this.setState({ currentSong: song });
+  }
+
+  handleSongClick(song) {
+    const isSameSong = this.state.currentSong === song;
+    if (this.state.isPlaying && isSameSong) {
+      this.pause();
+    } else {
+      if (!isSameSong) {this.setSong(song); }
+      this.play();
+    }
+  }
+
+  onMouseEnter(e) {
+    console.log(e.target.id);
+    if (e.target !== this.state.currentSong && !this.state.isPlaying) {
+      this.setState({
+        dynamicClass: 'icon ion-ios-play',
+        targetId: e.target.id
+      });;
+    }
+  }
+
+ onMouseLeave(e) {
+   console.log(e.target);
+   if (!this.state.currentSong || !this.state.isPlaying) {
+     this.setState({
+       dynamicClass: 'song-number',
+       targetId: e.target.id
+     });
+   }
+   else if (this.state.currentSong) {
+     this.setState({
+       dynamicClass: 'icon ion-ios-pause',
+       targetId: e.target.id
+     })
+   }
+ }
+
+
+
+
+
   render() {
   return(
     <section className="album">
@@ -34,7 +99,14 @@ class Album extends Component {
         </colgroup>
         <tbody>
         {this.state.album.songs.map( (song, index) =>
-          <tr className="song" key={index}>
+          <tr className="song" key={index} onClick={() => this.handleSongClick(song)} >
+          <td className="song-actions">
+           <button>
+            <span className={(this.state.isPlaying && (this.state.currentSong === song)) ?'hidden-number' : 'song-number'}>{index + 1}</span>
+            <span className={(this.state.isPlaying && (this.state.currentSong === song)) ? 'icon ion-ios-pause' : ''}></span>
+            <span className={(this.state.isPlaying && (this.state.currentSong === song)) ? '' : 'icon ion-ios-play'}></span>
+            </button>
+            </td>
           <td className="song-number">{song.number}</td>
           <td className="song-title">{song.title}</td>
           <td className="song-duration">{song.duration}</td>
